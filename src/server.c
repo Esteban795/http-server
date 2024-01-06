@@ -51,10 +51,10 @@ void* createClientThread(void* arg) {
     return NULL;
 }
 
-int setupServer(void){
+int setupServer(int port){
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(MYPORT);
+    server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = INADDR_ANY; //accept connections from any address
 
     int server_fd = socket(AF_INET,SOCK_STREAM,0);
@@ -79,12 +79,19 @@ int setupServer(void){
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    printf("Server all set up and listening on port %d\n",MYPORT);
+    printf("Server all set up and listening on port %d\n",port);
     return server_fd;
 }
 
-int main(void){
-    int server_fd = setupServer();
+int main(int argc,char* argv[]){
+    int MYPORT = 8080;
+    if (argc == 2) {
+        MYPORT = atoi(argv[1]);
+    } else if (argc > 2) {
+        fprintf(stderr,"Usage: %s [port] (default is 8080).\n",argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    int server_fd = setupServer(MYPORT);
     while (true) {
         struct sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
@@ -93,9 +100,11 @@ int main(void){
             perror("accept");
             continue;
         }
+        printf("New connection from %s:%d\n",inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
         pthread_t client_thread;
         pthread_create(&client_thread,NULL,createClientThread,(void*)client_fd);
         pthread_detach(client_thread);
+        printf("Closed connection from %s:%d\n",inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
     }
     close(server_fd);
     return 0;
