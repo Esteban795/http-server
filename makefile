@@ -2,20 +2,19 @@ SRCDIR = src
 HEADDIR = include
 LIBDIR = ./src
 
-FLAGS = -lSDL2
 DEBUGFLAGS = -W -Wall -Wextra -Wvla -fsanitize=address -g
-DEPENDENCIES = $(SRCDIR)/byte_reader.c
+DEPENDENCIES = $(SRCDIR)/http.c $(SRCDIR)/string_utils.c
 build:
-	gcc $(SRCDIR)/http_server.c -o ./bin/http_server  $(DEPENDENCIES) $(FLAGS)
+	gcc $(SRCDIR)/server.c -o ./bin/server  $(DEPENDENCIES) $(FLAGS)
 
 run:
-	./bin/http_server
+	./bin/server
 
 clean:
-	rm ./bin/http_server
+	rm ./bin/server
 
 debug:
-	gcc $(SRCDIR)/http_server.c -o ./bin/wad_reader $(DEPENDENCIES) $(DEBUGFLAGS) $(FLAGS)
+	gcc $(SRCDIR)/server.c -o ./bin/server $(DEPENDENCIES) $(DEBUGFLAGS) $(FLAGS)
 
 all:
 	make build
